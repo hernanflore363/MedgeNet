@@ -16,7 +16,7 @@ Disclaimer: MedgeNet is not affiliated with or endorsed by Electronic Arts.
 ## Features
 
 - Account and persona creation (for each server).
-- Time Trial and Speed Run leaderboard support.
+- Time Trial and Speed Run leaderboard support (custom maps not supported at this stage).
 - Ghost upload, listing, download, and playback support.
 
 ## Requirements
