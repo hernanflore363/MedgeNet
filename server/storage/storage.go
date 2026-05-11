@@ -646,14 +646,14 @@ func periodCutoff(periodID int, now time.Time) (time.Time, bool) {
 	now = now.UTC()
 	switch periodID {
 	case 2:
-		return time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC), true
-	case 4:
 		weekday := int(now.Weekday())
 		if weekday == 0 {
 			weekday = 7
 		}
 		start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 		return start.AddDate(0, 0, -(weekday - 1)), true
+	case 4:
+		return time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC), true
 	default:
 		return time.Time{}, false
 	}

@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+const (
+	lockerMaxFiles = 10000
+	lockerMaxBytes = 1 << 30
+)
+
 type Entry struct {
 	Name   string `json:"name"`
 	Desc   string `json:"desc"`
@@ -28,7 +33,7 @@ func BuildXML(entries []Entry, game string, pers string) string {
 	}
 
 	var b strings.Builder
-	fmt.Fprintf(&b, `<LOCKER error="0" numFiles="%d" maxFiles="150" numBytes="%d" maxBytes="1048576"`, len(entries), totalBytes)
+	fmt.Fprintf(&b, `<LOCKER error="0" numFiles="%d" maxFiles="%d" numBytes="%d" maxBytes="%d"`, len(entries), lockerMaxFiles, totalBytes, lockerMaxBytes)
 	if game != "" {
 		fmt.Fprintf(&b, ` game="%s"`, attr(game))
 	}

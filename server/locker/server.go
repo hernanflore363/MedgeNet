@@ -26,6 +26,8 @@ var (
 	safeIDPattern    = regexp.MustCompile(`^[A-Za-z0-9_. -]+$`)
 )
 
+const lockerListMaxEntries = 150
+
 type Server struct {
 	cfg   config.Config
 	log   *mlog.Logger
@@ -119,8 +121,9 @@ func (s *Server) handleRequest(method string, path string, headers map[string]st
 			s.log.Write("HTTP", "FileLocker dir error: "+err.Error())
 			return 200, []byte(`<LOCKER error="1"/>`), "text/xml"
 		}
-		s.log.Write("HTTP", fmt.Sprintf("FileLocker dir: returning %d file(s) for %s", len(entries), pers))
-		return 200, []byte(BuildXML(entries, params.Get("game"), pers)), "text/xml"
+		listEntries := capLockerList(entries)
+		s.log.Write("HTTP", fmt.Sprintf("FileLocker dir: returning %d/%d file(s) for %s", len(listEntries), len(entries), pers))
+		return 200, []byte(BuildXML(listEntries, params.Get("game"), pers)), "text/xml"
 
 	case "nfo":
 		name := params.Get("name")
@@ -139,6 +142,8 @@ func (s *Server) handleRequest(method string, path string, headers map[string]st
 				}
 			}
 			entries = filtered
+		} else {
+			entries = capLockerList(entries)
 		}
 		return 200, []byte(BuildXML(entries, params.Get("game"), pers)), "text/xml"
 
@@ -147,18 +152,16 @@ func (s *Server) handleRequest(method string, path string, headers map[string]st
 		if !s.safeIdentifier(pers) || !s.safeIdentifier(name) {
 			return 404, nil, "application/octet-stream"
 		}
-		entries, err := s.ghostEntries(pers)
+		entry, ok, err := s.findGhostEntry(pers, name)
 		if err != nil {
 			return 404, nil, "application/octet-stream"
 		}
-		for _, entry := range entries {
-			if entry.Name == name {
-				data, err := os.ReadFile(entry.path)
-				if err != nil {
-					return 404, nil, "application/octet-stream"
-				}
-				return 200, data, "application/octet-stream"
+		if ok {
+			data, err := os.ReadFile(entry.path)
+			if err != nil {
+				return 404, nil, "application/octet-stream"
 			}
+			return 200, data, "application/octet-stream"
 		}
 		return 404, nil, "application/octet-stream"
 
@@ -208,14 +211,47 @@ func (s *Server) ghostEntries(pers string) ([]Entry, error) {
 		return nil, nil
 	}
 	entries, err := s.collectGhostEntries(pers + "_")
-	if err != nil || len(entries) > 0 {
-		return withStretchAliases(s.store, entries)
-	}
-	all, err := s.collectGhostEntries("")
 	if err != nil {
 		return nil, err
 	}
-	return withStretchAliases(s.store, all)
+	return withStretchAliases(s.store, entries)
+}
+
+func (s *Server) findGhostEntry(pers string, name string) (Entry, bool, error) {
+	entries, err := s.ghostEntries(pers)
+	if err != nil {
+		return Entry{}, false, err
+	}
+	if entry, ok := findEntryByName(entries, name); ok {
+		return entry, true, nil
+	}
+
+	all, err := s.collectGhostEntries("")
+	if err != nil {
+		return Entry{}, false, err
+	}
+	all, err = withStretchAliases(s.store, all)
+	if err != nil {
+		return Entry{}, false, err
+	}
+	entry, ok := findEntryByName(all, name)
+	return entry, ok, nil
+}
+
+func findEntryByName(entries []Entry, name string) (Entry, bool) {
+	for _, entry := range entries {
+		if entry.Name == name {
+			return entry, true
+		}
+	}
+	return Entry{}, false
+}
+
+func capLockerList(entries []Entry) []Entry {
+	if len(entries) <= lockerListMaxEntries {
+		return entries
+	}
+	return entries[:lockerListMaxEntries]
 }
 
 func (s *Server) collectGhostEntries(prefix string) ([]Entry, error) {
